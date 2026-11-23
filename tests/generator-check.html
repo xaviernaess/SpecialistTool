@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Question generator check</title>
+<style>
+  body{background:#171819;color:#e5e6e4;font:14px system-ui,sans-serif;padding:32px}pre{white-space:pre-wrap}
+  .pass{color:#b8c6bb}.fail{color:#ff9585}
+</style>
+<h1>Question generator check</h1>
+<pre id="result">Running…</pre>
+<script src="../question-bank.js"></script>
+<script>
+(() => {
+  const result = document.querySelector('#result');
+  const lines = [];
+  let generated = 0;
+  try {
+    const bank = window.SpecialistQuestionBank;
+    const topics = ['algebra','functions','calculus','vectors','complex','mechanics','probability','trigonometry'];
+    const modes = ['noncas','cas'];
+    const levels = ['Easy','Medium','Hard','Very Hard'];
+    for (const topic of topics) {
+      for (const level of levels) {
+        const pair = modes.map(mode => bank.generate(topic, level, mode));
+        if (pair[0].prompt === pair[1].prompt) throw new Error(`CAS and Non-CAS are identical: ${topic} / ${level}`);
+        for (const mode of modes) {
+          for (let i = 0; i < 25; i += 1) {
+            const sample = bank.generate(topic, level, mode);
+            if (sample.topic !== topic || sample.difficulty !== level || sample.mode !== mode) throw new Error(`Wrong metadata: ${topic} / ${level} / ${mode}`);
+            if (!sample.prompt || !sample.answer || !Array.isArray(sample.steps) || sample.steps.length < 2) throw new Error(`Incomplete question: ${topic} / ${level} / ${mode}`);
+            const maths = [sample.prompt, sample.answer, ...sample.steps];
+            for (const text of maths) {
+              if ((text.match(/\\\(/g) || []).length !== (text.match(/\\\)/g) || []).length) throw new Error(`Unbalanced inline maths: ${topic} / ${level} / ${mode}`);
+            }
+            generated += 1;
+          }
+        }
+      }
+      lines.push(`PASS  ${topic}: ${levels.length} levels × ${modes.length} modes × 25 generated`);
+    }
+    result.className = 'pass';
+    result.textContent = lines.join('\n') + `\n\nPASS  ${generated} questions generated without missing fields or runtime errors.`;
+    document.title = 'PASS — question generator check';
+  } catch (error) {
+    result.className = 'fail';
+    result.textContent = `FAIL  ${error.message || error}`;
+    document.title = 'FAIL — question generator check';
+  }
+})();
+</script>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Application interaction check</title>
+<style>body{background:#171819;color:#e5e6e4;font:14px system-ui,sans-serif;padding:32px}pre{white-space:pre-wrap}.pass{color:#b8c6bb}.fail{color:#ff9585}iframe{width:1px;height:1px;position:absolute;left:-10px;border:0}</style>
+<h1>Application interaction check</h1>
+<pre id="result">Running…</pre>
+<iframe id="app" src="../index.html"></iframe>
+<script>
+(async () => {
+  const output = document.querySelector('#result');
+  const frame = document.querySelector('#app');
+  const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const assert = (condition, message) => { if (!condition) throw new Error(message); };
+  const report = text => fetch(`/?app-check=${encodeURIComponent(text)}`).catch(() => {});
+  const click = (doc, selector) => {
+    const element = doc.querySelector(selector);
+    assert(element, `Missing control: ${selector}; mode controls: ${frame.contentDocument.querySelector('#mode-options')?.innerHTML || 'not found'}`);
+    element.click();
+  };
+  try {
+    for (let attempt = 0; attempt < 100 && !frame.contentDocument.querySelector('[data-topic]'); attempt += 1) await pause(50);
+    let doc = frame.contentDocument;
+    const win = frame.contentWindow;
+    win.localStorage.removeItem('specialistMathsPractice.v1');
+    click(doc, '[data-mode="cas"]');
+    click(doc, '[data-topic="probability"]');
+    click(doc, '[data-difficulty="Very Hard"]');
+    click(doc, '#start-button');
+    assert(doc.querySelector('#question-mode').textContent === 'CAS', 'Question did not show CAS mode');
+    assert(doc.querySelector('#question-topic').textContent === 'Probability', 'Question topic mismatch');
+    assert(doc.querySelector('#question-difficulty').textContent === 'Very Hard', 'Question difficulty mismatch');
+    click(doc, '#answer-button');
+    click(doc, '#solution-button');
+    assert(!doc.querySelector('#answer-panel').hidden && !doc.querySelector('#solution-panel').hidden, 'Answer or solution did not open');
+    click(doc, '#flag-button');
+    click(doc, '.correct-button');
+    let stored = JSON.parse(win.localStorage.getItem('specialistMathsPractice.v1'));
+    assert(stored.attempted === 1 && stored.byMode.cas.attempted === 1 && stored.byMode.cas.correct === 1, 'CAS score was not recorded');
+    assert(stored.flagged.length === 1 && stored.flagged[0].mode === 'cas', 'Flag was not saved with its mode');
+
+    click(doc, 'a[data-nav="progress"]');
+    assert(doc.querySelector('#progress-summary').textContent.includes('CAS accuracy'), 'CAS progress summary missing');
+    assert(doc.querySelectorAll('.flagged-item').length === 1, 'Flagged question missing from list');
+    click(doc, '[data-review]');
+    assert(doc.querySelector('#question-mode').textContent === 'CAS', 'Review did not reopen the saved mode');
+    click(doc, '#flag-button');
+    click(doc, '#back-home');
+    click(doc, '[data-mode="noncas"]');
+    click(doc, '[data-topic="trigonometry"]');
+    click(doc, '[data-difficulty="Hard"]');
+    click(doc, '#start-button');
+    assert(doc.querySelector('#question-mode').textContent === 'Non-CAS', 'Non-CAS mode did not start');
+    click(doc, '#answer-button');
+    click(doc, '.incorrect-button');
+    stored = JSON.parse(win.localStorage.getItem('specialistMathsPractice.v1'));
+    assert(stored.attempted === 2 && stored.byMode.noncas.attempted === 1 && stored.byMode.noncas.correct === 0, 'Non-CAS score was not tracked separately');
+
+    const themeButton = doc.querySelector('.theme-toggle');
+    themeButton.click();
+    assert(doc.body.classList.contains('light'), 'Theme toggle did not switch to light mode');
+    assert(frame.contentWindow.localStorage.getItem('specialistMathsTheme') === 'light', 'Theme setting was not saved');
+    frame.contentWindow.location.reload();
+    await pause(500);
+    stored = JSON.parse(frame.contentWindow.localStorage.getItem('specialistMathsPractice.v1'));
+    assert(stored.attempted === 2 && stored.flagged.length === 0, 'Progress or unflagging did not persist after reload');
+    assert(frame.contentWindow.localStorage.getItem('specialistMathsTheme') === 'light', 'Theme setting did not persist after reload');
+
+    output.className = 'pass';
+    output.textContent = 'PASS  CAS and Non-CAS selection\nPASS  question metadata, answer and worked solution\nPASS  flag, review and unflag\nPASS  mode-separated progress and accuracy\nPASS  localStorage persistence across reload\nPASS  light/dark theme setting';
+    document.title = 'PASS — application interaction check';
+    report('PASS');
+  } catch (error) {
+    output.className = 'fail';
+    output.textContent = `FAIL  ${error.message || error}`;
+    document.title = 'FAIL — application interaction check';
+    report(output.textContent);
+  }
+})();
+</script>
+</html>

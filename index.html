@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171819">
+  <meta name="description" content="VCE Specialist Mathematics practice.">
+  <title>Specialist Maths Practice</title>
+  <link rel="stylesheet" href="style.css">
+  <script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"]]},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"]}};</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <script defer src="question-bank.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="app-name" href="#home" aria-label="Specialist Maths home"><span class="app-symbol">∑</span><span>Specialist Maths</span></a>
+      <div class="sidebar-rule"></div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <a class="side-link active" href="#home" data-view-link="home" data-nav="practice"><span class="side-icon">⌂</span>Practice</a>
+        <a class="side-link" href="#topics" data-view-link="home" data-nav="topics"><span class="side-icon">▦</span>Topics</a>
+        <a class="side-link" href="#flagged" data-view-link="progress" data-nav="flagged"><span class="side-icon">⚑</span>Flagged</a>
+        <a class="side-link" href="#progress" data-view-link="progress" data-nav="progress"><span class="side-icon">▤</span>Progress</a>
+      </nav>
+      <div class="sidebar-bottom"><div class="sidebar-rule"></div><button class="side-link settings-button theme-toggle" type="button" aria-label="Switch to light mode"><span class="side-icon">⚙</span><span class="setting-label">Settings · Light mode</span></button><div class="sidebar-version">LOCAL PRACTICE · VCE</div></div>
+    </aside>
+
+    <main class="workspace">
+      <section id="home-view" class="view home-view">
+        <header class="page-title"><div class="eyebrow">VCE · SPECIALIST MATHEMATICS</div><h1>Specialist Mathematics</h1><p>VCE Specialist Mathematics practice</p></header>
+        <section id="topics-panel" class="topic-setup" aria-labelledby="topic-heading">
+          <fieldset class="field-group mode-group"><legend>Practice mode</legend><div class="mode-options" id="mode-options"><button type="button" class="mode-option" data-mode="noncas" aria-pressed="true"><strong>Non-CAS</strong><span>Exact methods &amp; reasoning</span></button><button type="button" class="mode-option" data-mode="cas" aria-pressed="false"><strong>CAS</strong><span>Technology-supported problems</span></button></div></fieldset>
+          <div class="section-title"><h2 id="topic-heading">Choose a topic</h2><span class="subtle-label">SELECT ONE</span></div>
+          <fieldset class="field-group"><legend class="visually-hidden">Topic</legend><div class="topic-grid" id="topic-options"></div></fieldset>
+          <fieldset class="field-group difficulty-group"><legend>Difficulty</legend><div class="difficulty-options" id="difficulty-options"></div></fieldset>
+          <button class="primary-button start-button" id="start-button" type="button">Start practice <span aria-hidden="true">→</span></button>
+        </section>
+        <section class="continue-row" id="continue-card" hidden><span class="subtle-label">CURRENT SESSION</span><button class="text-button" id="continue-button" type="button">Continue previous question →</button></section>
+        <section class="home-summary" aria-label="Practice summary"><span><strong id="stat-attempted">0</strong> attempted</span><span><strong id="stat-correct">0</strong> correct</span><span><strong id="stat-accuracy">0%</strong> accuracy</span><span><strong id="stat-flagged">0</strong> flagged</span><span class="summary-meter"><span id="accuracy-bar"></span></span></section>
+      </section>
+
+      <section id="practice-view" class="view" hidden>
+        <div class="view-toolbar"><button class="back-button" id="back-home" type="button">← <span>Practice</span></button><span class="session-label">PRACTICE SESSION</span></div>
+        <article class="question-view">
+          <div class="question-top"><div class="question-tags"><span class="tag topic-tag" id="question-topic"></span><span class="tag difficulty-tag" id="question-difficulty"></span><span class="tag mode-tag" id="question-mode"></span></div><button class="flag-button" id="flag-button" type="button"><span aria-hidden="true">⚑</span> <span id="flag-label">Flag</span></button></div>
+          <div class="question-content"><div class="subtle-label">QUESTION</div><h1 id="question-title">Take your time.</h1><div class="question-math" id="question-prompt"></div></div>
+          <div class="question-actions"><button class="secondary-button" id="answer-button" type="button">Reveal answer</button><button class="secondary-button" id="solution-button" type="button">Worked solution</button><button class="primary-button next-button" id="next-button" type="button">Next question <span aria-hidden="true">→</span></button></div>
+          <div class="answer-panel" id="answer-panel" hidden><div class="subtle-label">ANSWER</div><div class="answer-text" id="answer-text"></div><div class="self-check" id="self-check"><span>How did you go?</span><button type="button" class="check-button correct-button" data-result="correct">Correct</button><button type="button" class="check-button incorrect-button" data-result="incorrect">Need practice</button></div><div class="recorded-result" id="recorded-result" hidden></div></div>
+          <div class="solution-panel" id="solution-panel" hidden><div class="subtle-label">WORKED SOLUTION</div><ol id="solution-steps"></ol></div>
+        </article>
+      </section>
+
+      <section id="progress-view" class="view" hidden>
+        <header class="page-title progress-title"><div class="eyebrow">PRACTICE RECORD</div><h1>Progress</h1><p>Saved in this browser</p></header>
+        <div class="progress-summary" id="progress-summary"></div>
+        <section class="topic-progress-section"><div class="section-title"><h2>Questions by topic</h2></div><div id="topic-progress-list" class="topic-progress-list"></div></section>
+        <section class="flagged-section" id="flagged-section"><div class="section-title"><h2>Flagged questions</h2><span class="flag-count" id="flag-count">0</span></div><div id="flagged-list" class="flagged-list"></div></section>
+      </section>
+      <footer class="workspace-footer"><span>Specialist Mathematics · VCE</span><span>Progress stored locally</span></footer>
+    </main>
+  </div>
+</body>
+</html>
